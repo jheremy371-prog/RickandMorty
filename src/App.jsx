@@ -38,119 +38,139 @@ function App() {
   }, [searchTerm]); 
 
   return (
-    <div className="max-w-7xl mx-auto p-8 text-center font-sans bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Enciclopedia Rick and Morty</h1>
-      
-      <div className="mb-8">
-        <input
-          type="text"
-          placeholder="Buscar en todo el universo..."
-          className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-800"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+    // Fondo oscuro profundo para toda la pantalla
+    <div className="bg-gray-950 min-h-screen text-gray-100 font-sans antialiased selection:bg-green-500 selection:text-black">
+      <div className="max-w-7xl mx-auto p-8 text-center">
+        
+        {/* Título mejorado con estilo de portal interdimensional */}
+        <div className="mb-10 pt-4">
+          <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-green-400 via-emerald-500 to-cyan-400 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
+            RICK AND MORTY
+          </h1>
+          <p className="text-emerald-500 text-xs font-mono tracking-widest uppercase mt-3">
+            Explorador del Multiverso - API Oficial de Personajes
+          </p>
+        </div>
+        
+        {/* Barra de búsqueda adaptada para modo oscuro */}
+        <div className="mb-10">
+          <input
+            type="text"
+            placeholder="Buscar en todo el multiverso..."
+            className="w-full max-w-md px-5 py-3 border border-gray-800 rounded-xl shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 bg-gray-900 text-white placeholder-gray-500 transition-all text-center"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-      {loading ? (
-        <p className="text-2xl text-gray-600 font-semibold my-10">Cargando datos del multiverso...</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {characters.length > 0 ? (
-              characters.map((character) => (
-                <div key={character.id} className="flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-lg bg-white text-gray-800 transition-all hover:scale-105 hover:shadow-2xl">
-                  
-                  {/* Contenedor de la Imagen */}
-                  <div className="relative">
-                    <img src={character.image} alt={character.name} className="w-full h-auto object-cover" />
-                    
-                    {/* Badge Dinámico de Estado (Vivo/Muerto/Desconocido) */}
-                    <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-bold rounded-full text-white shadow-md ${
-                      character.status === 'Alive' ? 'bg-green-500' : 
-                      character.status === 'Dead' ? 'bg-red-500' : 'bg-gray-500'
-                    }`}>
-                      {character.status === 'Alive' ? 'Vivo' : character.status === 'Dead' ? 'Muerto' : 'Desconocido'}
-                    </span>
-                  </div>
-
-                  {/* Contenido de la Tarjeta con toda la información */}
-                  <div className="p-5 text-left flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xl font-extrabold text-gray-900 mb-3 truncate" title={character.name}>
-                        {character.name}
-                      </h3>
-                      
-                      {/* Información Básica en cuadrícula pequeña */}
-                      <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-                        <div className="bg-gray-100 p-2 rounded-md">
-                          <span className="block text-gray-500 font-medium">Especie</span>
-                          <span className="font-bold text-gray-700 truncate block">{character.species}</span>
-                        </div>
-                        <div className="bg-gray-100 p-2 rounded-md">
-                          <span className="block text-gray-500 font-medium">Género</span>
-                          <span className="font-bold text-gray-700 truncate block">
-                            {character.gender === 'Male' ? 'Masculino' : 
-                             character.gender === 'Female' ? 'Femenino' : 
-                             character.gender === 'Genderless' ? 'Sin Género' : 'Desconocido'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Detalles de Ubicación y Origen */}
-                      <div className="space-y-2 text-sm border-t border-gray-100 pt-3">
-                        <p className="text-xs">
-                          <strong className="text-gray-500 block font-medium">Subtipo/Especialidad:</strong>
-                          <span className="text-gray-800 font-semibold">{character.type || 'Ninguno'}</span>
-                        </p>
-                        <p className="text-xs">
-                          <strong className="text-gray-500 block font-medium">Origen conocido:</strong>
-                          <span className="text-gray-800 font-semibold truncate block" title={character.origin.name}>
-                            {character.origin.name}
-                          </span>
-                        </p>
-                        <p className="text-xs">
-                          <strong className="text-gray-500 block font-medium">Última ubicación vista:</strong>
-                          <span className="text-gray-800 font-semibold truncate block" title={character.location.name}>
-                            {character.location.name}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Estadísticas de Episodios al fondo de la tarjeta */}
-                    <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-center bg-blue-50 text-blue-700 p-2 rounded-lg font-bold">
-                      Aparece en {character.episode.length} {character.episode.length === 1 ? 'episodio' : 'episodios'}
-                    </div>
-
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="col-span-full text-xl text-gray-500">No se encontraron personajes con ese nombre en todo el universo.</p>
-            )}
+        {loading ? (
+          <div className="my-20 space-y-4">
+            <p className="text-2xl text-emerald-400 font-mono animate-pulse">CONECTANDO CON EL PORTAL...</p>
+            <p className="text-sm text-gray-500">Descargando datos de la dimensión actual</p>
           </div>
+        ) : (
+          <>
+            {/* Cuadrícula de tarjetas oscuras */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {characters.length > 0 ? (
+                characters.map((character) => (
+                  <div key={character.id} className="flex flex-col border border-gray-800 rounded-2xl overflow-hidden shadow-2xl bg-gray-900 text-gray-100 transition-all duration-300 hover:scale-105 hover:border-green-500/50 hover:shadow-[0_0_25px_rgba(34,197,94,0.15)]">
+                    
+                    {/* Contenedor de la Imagen */}
+                    <div className="relative overflow-hidden group">
+                      <img src={character.image} alt={character.name} className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110" />
+                      
+                      {/* Estado Dinámico */}
+                      <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-bold rounded-full text-white shadow-md backdrop-blur-sm ${
+                        character.status === 'Alive' ? 'bg-green-500/80 border border-green-400' : 
+                        character.status === 'Dead' ? 'bg-red-500/80 border border-red-400' : 'bg-gray-600/80 border border-gray-500'
+                      }`}>
+                        {character.status === 'Alive' ? 'Vivo' : character.status === 'Dead' ? 'Muerto' : 'Desconocido'}
+                      </span>
+                    </div>
 
-          {(info.next || info.prev) && (
-            <div className="flex justify-center items-center gap-4 mt-10">
-              <button 
-                onClick={() => fetchCharacters(info.prev)} 
-                disabled={!info.prev || loading}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                Anterior
-              </button>
-              
-              <button 
-                onClick={() => fetchCharacters(info.next)} 
-                disabled={!info.next || loading}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                Siguiente
-              </button>
+                    {/* Información interna de la tarjeta */}
+                    <div className="p-5 text-left flex-1 flex flex-col justify-between bg-gradient-to-b from-gray-900 to-gray-950">
+                      <div>
+                        <h3 className="text-lg font-extrabold text-white mb-3 truncate hover:text-green-400 transition-colors" title={character.name}>
+                          {character.name}
+                        </h3>
+                        
+                        {/* Cuadrícula técnica interna */}
+                        <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
+                          <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-800">
+                            <span className="block text-gray-500 font-medium">Especie</span>
+                            <span className="font-bold text-gray-300 truncate block">{character.species}</span>
+                          </div>
+                          <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-800">
+                            <span className="block text-gray-500 font-medium">Género</span>
+                            <span className="font-bold text-gray-300 truncate block">
+                              {character.gender === 'Male' ? 'Masculino' : 
+                               character.gender === 'Female' ? 'Femenino' : 
+                               character.gender === 'Genderless' ? 'Sin Género' : 'Desconocido'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Detalles de localización */}
+                        <div className="space-y-2 text-xs border-t border-gray-800/60 pt-3">
+                          <p>
+                            <strong className="text-gray-500 block font-medium">Subtipo/Especialidad:</strong>
+                            <span className="text-gray-300 font-semibold">{character.type || 'Ninguno'}</span>
+                          </p>
+                          <p>
+                            <strong className="text-gray-500 block font-medium">Origen conocido:</strong>
+                            <span className="text-gray-300 font-semibold truncate block" title={character.origin.name}>
+                              {character.origin.name}
+                            </span>
+                          </p>
+                          <p>
+                            <strong className="text-gray-500 block font-medium">Última ubicación vista:</strong>
+                            <span className="text-gray-300 font-semibold truncate block" title={character.location.name}>
+                              {character.location.name}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Contador de episodios con color de portal */}
+                      <div className="mt-4 pt-3 border-t border-gray-800/60 text-xs text-center bg-emerald-950/30 text-emerald-400 p-2 rounded-lg font-mono border border-emerald-900/30">
+                        APARICIONES: {character.episode.length} {character.episode.length === 1 ? 'EPISODIO' : 'EPISODIOS'}
+                      </div>
+
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-full text-xl text-gray-500 font-mono my-10">
+                  ⚠️ No se detectan firmas biológicas con ese nombre en este cuadrante.
+                </p>
+              )}
             </div>
-          )}
-        </>
-      )}
+
+            {/* Paginación estilo Cyberpunk */}
+            {(info.next || info.prev) && (
+              <div className="flex justify-center items-center gap-4 mt-12 pb-6">
+                <button 
+                  onClick={() => fetchCharacters(info.prev)} 
+                  disabled={!info.prev || loading}
+                  className="px-6 py-2 bg-gray-900 text-gray-300 font-mono text-sm border border-gray-800 rounded-lg shadow-md hover:bg-gray-800 hover:text-white disabled:bg-gray-950 disabled:text-gray-700 disabled:border-gray-900 disabled:cursor-not-allowed transition-all"
+                >
+                  &lt; ANTERIOR
+                </button>
+                
+                <button 
+                  onClick={() => fetchCharacters(info.next)} 
+                  disabled={!info.next || loading}
+                  className="px-6 py-2 bg-emerald-600 text-white font-mono text-sm rounded-lg shadow-md hover:bg-emerald-500 shadow-emerald-900/20 disabled:bg-gray-950 disabled:text-gray-700 disabled:border-gray-900 disabled:cursor-not-allowed transition-all"
+                >
+                  SIGUIENTE &gt;
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
