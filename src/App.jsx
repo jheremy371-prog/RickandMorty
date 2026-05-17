@@ -4,11 +4,17 @@ function App() {
   const [characters, setCharacters] = useState([]);
   const [info, setInfo] = useState({});
   const [loading, setLoading] = useState(true);
+  
   const [searchTerm, setSearchTerm] = useState('');
+  const [status, setStatus] = useState('');
+  const [species, setSpecies] = useState('');
+  const [gender, setGender] = useState('');
+  const [type, setType] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [location, setLocation] = useState('');
 
   const fetchCharacters = async (url) => {
     setLoading(true); 
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
@@ -39,7 +45,6 @@ function App() {
       });
 
       const completedCharacters = await Promise.all(characterPromises);
-
       setCharacters(completedCharacters);
       setInfo(data.info);
       setLoading(false); 
@@ -53,12 +58,25 @@ function App() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      const url = `https://rickandmortyapi.com/api/character/?name=${searchTerm}`;
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('name', searchTerm);
+      if (status) params.append('status', status);
+      if (species) params.append('species', species);
+      if (gender) params.append('gender', gender);
+      if (type) params.append('type', type); 
+
+      const url = `https://rickandmortyapi.com/api/character/?${params.toString()}`;
       fetchCharacters(url);
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]); 
+  }, [searchTerm, status, species, gender, type]); 
+
+  const finalCharacters = characters.filter((character) => {
+    const matchOrigin = character.origin.name.toLowerCase().includes(origin.toLowerCase());
+    const matchLocation = character.location.name.toLowerCase().includes(location.toLowerCase());
+    return matchOrigin && matchLocation;
+  });
 
   return (
     <div className="bg-gray-950 min-h-screen text-gray-100 font-sans antialiased selection:bg-green-500 selection:text-black">
@@ -69,18 +87,114 @@ function App() {
             PORTAL DATA: RICK AND MORTY
           </h1>
           <p className="text-emerald-500 text-xs font-mono tracking-widest uppercase mt-3">
-            Explorador del Multiverso // Base de Datos Oficial
+            Explorador Avanzado // Filtros de Densidad Biológica
           </p>
         </div>
-      
-        <div className="mb-10">
-          <input
-            type="text"
-            placeholder="Buscar en todo el multiverso..."
-            className="w-full max-w-md px-5 py-3 border border-gray-800 rounded-xl shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 bg-gray-900 text-white placeholder-gray-500 transition-all text-center"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        
+        <div className="bg-gray-900/60 border border-gray-800 p-6 rounded-2xl shadow-2xl mb-10 text-left backdrop-blur-sm">
+          <h2 className="text-emerald-400 font-mono text-sm uppercase font-bold mb-4 tracking-wider">
+            // Panel de Parámetros de Búsqueda
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Nombre</label>
+              <input
+                type="text"
+                placeholder="Ej: Rick, Morty..."
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white placeholder-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Estado Vital</label>
+              <select
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white focus:ring-2 focus:ring-green-500 focus:outline-none text-sm cursor-pointer"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="">Todos los estados</option>
+                <option value="alive">Vivo</option>
+                <option value="dead">Muerto</option>
+                <option value="unknown">Desconocido</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Especie</label>
+              <input
+                type="text"
+                placeholder="Ej: Human, Alien, Robot..."
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white placeholder-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
+                value={species}
+                onChange={(e) => setSpecies(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Género</label>
+              <select
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white focus:ring-2 focus:ring-green-500 focus:outline-none text-sm cursor-pointer"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option value="">Todos los géneros</option>
+                <option value="female">Femenino</option>
+                <option value="male">Masculino</option>
+                <option value="genderless">Sin Género</option>
+                <option value="unknown">Desconocido</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Subtipo / Especialidad</label>
+              <input
+                type="text"
+                placeholder="Ej: Parasite, Clone..."
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white placeholder-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Planeta de Origen</label>
+              <input
+                type="text"
+                placeholder="Ej: Earth, Post-Apocalyptic..."
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white placeholder-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-gray-400 font-medium">Última ubicación vista</label>
+              <input
+                type="text"
+                placeholder="Ej: Citadel, Anatomy Park..."
+                className="px-4 py-2 border border-gray-800 rounded-lg bg-gray-950 text-white placeholder-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setSearchTerm(''); setStatus(''); setSpecies('');
+                  setGender(''); setType(''); setOrigin(''); setLocation('');
+                }}
+                className="w-full h-[38px] bg-gray-800 text-gray-300 font-mono text-xs border border-gray-700 rounded-lg hover:bg-red-950/40 hover:text-red-400 hover:border-red-900/50 transition-all font-bold"
+              >
+                RESETEAR SISTEMA
+              </button>
+            </div>
+
+          </div>
         </div>
 
         {loading ? (
@@ -90,15 +204,14 @@ function App() {
               <p className="text-2xl text-emerald-400 font-mono font-bold animate-pulse tracking-wider">
                 IDENTIFICANDO HABITANTES DEL UNIVERSO...
               </p>
-              <p className="text-sm text-gray-500 font-mono">Escaneando huellas de ADN interdimensionales</p>
+              <p className="text-sm text-gray-500 font-mono">Aplicando filtros de espectro molecular masivo</p>
             </div>
           </div>
         ) : (
           <>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {characters.length > 0 ? (
-                characters.map((character) => (
+              {finalCharacters.length > 0 ? (
+                finalCharacters.map((character) => (
                   <div key={character.id} className="flex flex-col border border-gray-800 rounded-2xl overflow-hidden shadow-2xl bg-gray-900 text-gray-100 transition-all duration-300 hover:scale-105 hover:border-green-500/50 hover:shadow-[0_0_25px_rgba(34,197,94,0.15)]">
                     
                     <div className="relative overflow-hidden group">
@@ -168,7 +281,7 @@ function App() {
                 ))
               ) : (
                 <p className="col-span-full text-xl text-gray-500 font-mono my-10">
-                  ⚠️ No se detectan firmas biológicas con ese nombre en este cuadrante.
+                  ⚠️ No se detectan firmas biológicas con esos parámetros combinados.
                 </p>
               )}
             </div>
