@@ -7,7 +7,10 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchCharacters = async (url) => {
-    setLoading(true);
+    setLoading(true); 
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -15,11 +18,31 @@ function App() {
       if (data.error) {
         setCharacters([]);
         setInfo({});
-      } else {
-        setCharacters(data.results);
-        setInfo(data.info);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      const characterPromises = data.results.map(async (character) => {
+        if (character.episode && character.episode.length > 0) {
+          try {
+            const epResponse = await fetch(character.episode[0]);
+            const epData = await epResponse.json();
+            return { 
+              ...character, 
+              debutEpisode: `${epData.episode}: ${epData.name}` 
+            };
+          } catch (err) {
+            return { ...character, debutEpisode: "Dimensión Desconocida" };
+          }
+        }
+        return { ...character, debutEpisode: "Ninguno" };
+      });
+
+      const completedCharacters = await Promise.all(characterPromises);
+
+      setCharacters(completedCharacters);
+      setInfo(data.info);
+      setLoading(false); 
     } catch (error) {
       console.error("Error al obtener los personajes:", error);
       setCharacters([]);
@@ -38,21 +61,18 @@ function App() {
   }, [searchTerm]); 
 
   return (
-    // Fondo oscuro profundo para toda la pantalla
     <div className="bg-gray-950 min-h-screen text-gray-100 font-sans antialiased selection:bg-green-500 selection:text-black">
       <div className="max-w-7xl mx-auto p-8 text-center">
         
-        {/* Título mejorado con estilo de portal interdimensional */}
         <div className="mb-10 pt-4">
           <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-green-400 via-emerald-500 to-cyan-400 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
-            RICK AND MORTY
+            PORTAL DATA: RICK AND MORTY
           </h1>
           <p className="text-emerald-500 text-xs font-mono tracking-widest uppercase mt-3">
-            Explorador del Multiverso - API Oficial de Personajes
+            Explorador del Multiverso // Base de Datos Oficial
           </p>
         </div>
-        
-        {/* Barra de búsqueda adaptada para modo oscuro */}
+      
         <div className="mb-10">
           <input
             type="text"
@@ -64,23 +84,25 @@ function App() {
         </div>
 
         {loading ? (
-          <div className="my-20 space-y-4">
-            <p className="text-2xl text-emerald-400 font-mono animate-pulse">CONECTANDO CON EL PORTAL...</p>
-            <p className="text-sm text-gray-500">Descargando datos de la dimensión actual</p>
+          <div className="my-32 flex flex-col items-center justify-center space-y-6">
+            <div className="w-16 h-16 border-4 border-t-green-400 border-r-emerald-500 border-b-cyan-400 border-l-transparent rounded-full animate-spin"></div>
+            <div className="space-y-2">
+              <p className="text-2xl text-emerald-400 font-mono font-bold animate-pulse tracking-wider">
+                IDENTIFICANDO HABITANTES DEL UNIVERSO...
+              </p>
+              <p className="text-sm text-gray-500 font-mono">Escaneando huellas de ADN interdimensionales</p>
+            </div>
           </div>
         ) : (
           <>
-            {/* Cuadrícula de tarjetas oscuras */}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {characters.length > 0 ? (
                 characters.map((character) => (
                   <div key={character.id} className="flex flex-col border border-gray-800 rounded-2xl overflow-hidden shadow-2xl bg-gray-900 text-gray-100 transition-all duration-300 hover:scale-105 hover:border-green-500/50 hover:shadow-[0_0_25px_rgba(34,197,94,0.15)]">
                     
-                    {/* Contenedor de la Imagen */}
                     <div className="relative overflow-hidden group">
                       <img src={character.image} alt={character.name} className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110" />
-                      
-                      {/* Estado Dinámico */}
                       <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-bold rounded-full text-white shadow-md backdrop-blur-sm ${
                         character.status === 'Alive' ? 'bg-green-500/80 border border-green-400' : 
                         character.status === 'Dead' ? 'bg-red-500/80 border border-red-400' : 'bg-gray-600/80 border border-gray-500'
@@ -89,14 +111,12 @@ function App() {
                       </span>
                     </div>
 
-                    {/* Información interna de la tarjeta */}
                     <div className="p-5 text-left flex-1 flex flex-col justify-between bg-gradient-to-b from-gray-900 to-gray-950">
                       <div>
                         <h3 className="text-lg font-extrabold text-white mb-3 truncate hover:text-green-400 transition-colors" title={character.name}>
                           {character.name}
                         </h3>
                         
-                        {/* Cuadrícula técnica interna */}
                         <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
                           <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-800">
                             <span className="block text-gray-500 font-medium">Especie</span>
@@ -112,7 +132,6 @@ function App() {
                           </div>
                         </div>
 
-                        {/* Detalles de localización */}
                         <div className="space-y-2 text-xs border-t border-gray-800/60 pt-3">
                           <p>
                             <strong className="text-gray-500 block font-medium">Subtipo/Especialidad:</strong>
@@ -130,10 +149,16 @@ function App() {
                               {character.location.name}
                             </span>
                           </p>
+                          
+                          <p className="bg-gray-950 p-2 rounded-lg border border-gray-800/80 mt-2">
+                            <strong className="text-green-400 block text-[10px] font-mono tracking-wider uppercase">Primer episodio (Debut):</strong>
+                            <span className="text-gray-200 font-medium text-xs block truncate" title={character.debutEpisode}>
+                              {character.debutEpisode}
+                            </span>
+                          </p>
                         </div>
                       </div>
 
-                      {/* Contador de episodios con color de portal */}
                       <div className="mt-4 pt-3 border-t border-gray-800/60 text-xs text-center bg-emerald-950/30 text-emerald-400 p-2 rounded-lg font-mono border border-emerald-900/30">
                         APARICIONES: {character.episode.length} {character.episode.length === 1 ? 'EPISODIO' : 'EPISODIOS'}
                       </div>
@@ -148,7 +173,6 @@ function App() {
               )}
             </div>
 
-            {/* Paginación estilo Cyberpunk */}
             {(info.next || info.prev) && (
               <div className="flex justify-center items-center gap-4 mt-12 pb-6">
                 <button 
