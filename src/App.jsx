@@ -7,12 +7,11 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchCharacters = async (url) => {
-    setLoading(true);
+    setLoading(true); // 1. Iniciamos la carga. Los botones se desactivarán.
     try {
       const response = await fetch(url);
       const data = await response.json();
 
-      // Si la API no encuentra nada, devuelve un objeto con la propiedad "error"
       if (data.error) {
         setCharacters([]);
         setInfo({});
@@ -20,7 +19,7 @@ function App() {
         setCharacters(data.results);
         setInfo(data.info);
       }
-      setLoading(false);
+      setLoading(false); // 2. Finalizamos la carga. Los botones vuelven a funcionar.
     } catch (error) {
       console.error("Error al obtener los personajes:", error);
       setCharacters([]);
@@ -29,11 +28,15 @@ function App() {
     }
   };
 
-  // Este useEffect se ejecuta automáticamente cada vez que "searchTerm" cambia
   useEffect(() => {
-    // Construimos la URL de la API añadiendo el texto de búsqueda al final
-    const url = `https://rickandmortyapi.com/api/character/?name=${searchTerm}`;
-    fetchCharacters(url);
+    // 3. TECNICA DEBOUCE: Creamos un temporizador
+    const delayDebounceFn = setTimeout(() => {
+      const url = `https://rickandmortyapi.com/api/character/?name=${searchTerm}`;
+      fetchCharacters(url);
+    }, 500); // Espera 500 milisegundos
+
+    // 4. Limpieza: Si el usuario teclea otra letra ANTES de los 500ms, borramos el temporizador anterior
+    return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]); 
 
   return (
@@ -55,7 +58,6 @@ function App() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {/* Ahora mapeamos "characters" directamente, ya que la API nos da la lista limpia */}
             {characters.length > 0 ? (
               characters.map((character) => (
                 <div key={character.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white text-gray-800 transition-transform hover:scale-105">
@@ -72,12 +74,12 @@ function App() {
             )}
           </div>
 
-          {/* Ocultamos los botones si no hay información de paginación */}
           {(info.next || info.prev) && (
             <div className="flex justify-center items-center gap-4 mt-10">
               <button 
                 onClick={() => fetchCharacters(info.prev)} 
-                disabled={!info.prev}
+                // 5. BLOQUEO: Desactivar si no hay página anterior O si está cargando
+                disabled={!info.prev || loading}
                 className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 Anterior
@@ -85,7 +87,8 @@ function App() {
               
               <button 
                 onClick={() => fetchCharacters(info.next)} 
-                disabled={!info.next}
+                // 6. BLOQUEO: Desactivar si no hay página siguiente O si está cargando
+                disabled={!info.next || loading}
                 className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 Siguiente
